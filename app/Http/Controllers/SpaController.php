@@ -6,6 +6,6 @@ class SpaController extends Controller
 {
     public function index()
     {
-        return view('index', ['title' => 'Neft!']);
+        return view('index', ['title' => env('APP_NAME')]);
     }
 }

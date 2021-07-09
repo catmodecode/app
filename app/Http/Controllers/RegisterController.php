@@ -18,13 +18,13 @@ class RegisterController extends Controller
       [
         'name' => 'required|string',
         'email' => 'required|email',
-        'password' => 'required|string|size:5'
+        'password' => 'required|string|gte:5'
       ],
       [
         'required' => ':attribute_required',
         'string' => ':attribute_must_be_a_string',
         'email' => ':attribute_must_be_an_email',
-        'size' => ':attribute_is_to_short',
+        'gte' => ':attribute_is_to_short',
       ]
     );
 

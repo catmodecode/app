@@ -4,6 +4,7 @@
 
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SpaController;
+use Laravel\Lumen\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,7 +21,7 @@ $router->get('phpinfo', function() {
   return phpinfo();
 });
 
-$router->get('/[{any}]', SpaController::class . '@index');
+$router->get('{all:.*}', SpaController::class . '@index');
 
 $router->group(['prefix' => 'api'], function() use ($router) {
   $router->post('register', RegisterController::class . '@register');

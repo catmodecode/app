@@ -2,15 +2,12 @@
   "name": "neft",
   "version": "0.1.0",
   "private": true,
-  "watch": {
-    "dev": "resources/assets/*"
-  },
   "scripts": {
-    "watch-dev": "npm-watch dev",
     "serve": "vue-cli-service serve",
     "build": "rm -rf public/{js,css,img} && rm -rf resources/views/index.blade.php && vue-cli-service build --no-clean",
+    "lint": "vue-cli-service lint",
     "dev": "rm -rf public/{js,css,img} && rm -rf resources/views/index.blade.php && vue-cli-service build --no-clean --mode development --watch",
-    "lint": "vue-cli-service lint"
+    "watch-dev": "npm-watch dev"
   },
   "dependencies": {
     "core-js": "^3.6.5",
@@ -31,8 +28,10 @@
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^7.0.0",
     "npm-watch": "^0.9.0",
-    "sass": "^1.26.5",
-    "sass-loader": "^8.0.2"
+    "sass": "~1.32.0",
+    "sass-loader": "^10.0.0",
+    "vue-cli-plugin-vuetify": "~2.4.1",
+    "vue-loader": "^15.9.7"
   },
   "eslintConfig": {
     "root": true,
@@ -52,5 +51,22 @@
     "> 1%",
     "last 2 versions",
     "not dead"
-  ]
+  ],
+  "watch": {
+    "dev": {
+      "patterns": [
+        "resources/assets/*",
+        "./"
+      ],
+      "ignore": "/public/*",
+      "extensions": [
+        "vue",
+        "json",
+        "js",
+        "html",
+        "css",
+        "scss"
+      ]
+    }
+  }
 }

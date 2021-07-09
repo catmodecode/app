@@ -4,7 +4,7 @@ return [
     'default' => env('DB_DEFAULT', 'postgres'),
     'connections' => [
         'postgres' => [
-            'driver'    => env('DB_CONNECTION', 'mysql'),
+            'driver'    => env('DB_CONNECTION', 'pgsql'),
             'host'      => env('DB_HOST', 'localhost'),
             'database'  => env('DB_DATABASE', 'my_app'),
             'username'  => env('DB_USERNAME', 'root'),
