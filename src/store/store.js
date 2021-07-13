@@ -1,10 +1,12 @@
 import { createStore } from 'vuex'
-import user from './User/store';
-import menu from './Menu/store'
+import user from './User';
+import menu from './Menu'
+import app from './App'
 
 export default createStore({
     modules: {
         user,
-        menu
+        menu,
+        app,
     }
 });

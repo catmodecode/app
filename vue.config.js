@@ -11,9 +11,9 @@ module.exports = {
     pages: {
         index: {
             // точка входа для страницы
-            entry: "resources/assets/main.js",
+            entry: "src/main.js",
             // исходный шаблон
-            template: "resources/assets/index.html",
+            template: "src/index.html",
             // в результате будет dist/index.html
             filename: "../resources/views/index.blade.php",
             // когда используется опция title, то <title> в шаблоне
@@ -24,4 +24,13 @@ module.exports = {
             chunks: ["chunk-vendors", "chunk-common", "index"]
         }
     },
+
+    pluginOptions: {
+        quasar: {
+            importStrategy: "kebab",
+            rtlSupport: false
+        }
+    },
+
+    transpileDependencies: ["quasar"]
 };
