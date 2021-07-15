@@ -20,7 +20,7 @@ jobs:
       - name: Copy .env.example to .env
         run: php -r "file_exists('.env') || copy('.env.testing', '.env');"
       - name: check where am i
-        run: pwd && ls -al
+        run: cd .. && pwd && ls -al
       - name: Install composer dependencies
         run: composer install
       - name: Set required directory permissions
