@@ -23,7 +23,7 @@ jobs:
       - name: Install composer dependencies
         run: composer install
       - name: Set required directory permissions
-        run: chmod -R 777 storage bootstrap/cache
+        run: chmod -R 777 storage
       - name: Generate encryption key
         run: php artisan key:generate
       - name: Install NPM dependencies
