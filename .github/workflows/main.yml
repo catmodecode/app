@@ -19,7 +19,7 @@ jobs:
         with:
           php-version: 8.0.6
       - name: Copy .env.example to .env
-        run: php -r "file_exists('.env') || copy('.env.testing', '.env');"
+        run: php -r "file_exists('.env') || copy('.env.example', '.env') && copy('.env.example', '.env.testing');"
       - name: Install composer dependencies
         run: composer install
       - name: Set required directory permissions
