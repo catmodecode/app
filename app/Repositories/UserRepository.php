@@ -1,18 +1,20 @@
 <?php
 
-namespace App\Services;
+namespace App\Repositories;
 
 use App\Exceptions\EmailExistsException;
 use App\Exceptions\NotEmailException;
 use App\Exceptions\PasswordToWeakException;
+use App\Exceptions\WrongLoginOrPasswordException;
 use App\Models\User;
 use Exception;
+use Illuminate\Hashing\HashManager;
 use Illuminate\Support\Facades\Password;
 
 /**
- * UserService class
+ * UserRepository class
  */
-class UserService
+class UserRepository
 {
     /**
      * @param string $name
@@ -67,10 +69,30 @@ class UserService
         return true;
     }
 
-    public function checkCredintials(string $userEmail, string $password): ?User
+    /**
+     * Returns user match credintials
+     *
+     * @param string $userEmail
+     * @param string $password
+     * @return User
+     * 
+     * @throws WrongLoginOrPasswordException
+     */
+    public function checkCredintials(string $userEmail, string $password): User
     {
-        return User::whereEmail($userEmail)
-            ->wherePassword(User::getHashPassword($password))
-            ->first();
+        $user = User::whereEmail($userEmail)->first();
+        
+        if (!isset($user)) {
+            throw new WrongLoginOrPasswordException();
+        }
+
+        /** @var HashManager */
+        $hashManager = app('hash');
+
+        if (!$hashManager->check($password, $user->password)) {
+            throw new WrongLoginOrPasswordException();
+        }
+        
+        return $user;
     }
 }

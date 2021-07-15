@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Exceptions\EmailExistsException;
 use App\Models\User;
-use App\Services\UserService;
+use App\Repositories\UserRepository;
 use Illuminate\Console\Command;
 use Throwable;
 
@@ -16,9 +16,9 @@ class CreateUserCommand extends Command
 
   protected $description = 'Create new user';
 
-  private UserService $userService;
+  private UserRepository $userService;
 
-  public function __construct(UserService $userService)
+  public function __construct(UserRepository $userService)
   {
     parent::__construct();
     $this->userService = $userService;

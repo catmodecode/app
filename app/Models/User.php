@@ -47,7 +47,7 @@ class User extends Model implements AuthorizableContract
         $this->attributes['password'] = User::getHashPassword($plainPassword);
     }
 
-    public static function getHashPassword(string $plainPassword): string
+    protected static function getHashPassword(string $plainPassword): string
     {
         return app('hash')->make($plainPassword);
     }

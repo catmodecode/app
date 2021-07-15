@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\UserService;
+use App\Repositories\UserRepository;
 use Illuminate\Contracts\Validation\Validator as ValidationValidator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
 {
-  public function register(Request $request, UserService $userService): JsonResponse
+  public function register(Request $request, UserRepository $userService): JsonResponse
   {
     /** @var ValidationValidator */
     $validator = Validator::make(
