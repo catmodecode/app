@@ -26,6 +26,8 @@ jobs:
         run: chmod -R 777 storage
       - name: Generate encryption key
         run: php artisan key:generate
+      - name: Generate sha tokens
+        run: php artisan tokens:generate
       - name: Install NPM dependencies
         run: npm i
       - name: Minify CSS and JS files
