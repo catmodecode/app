@@ -11,16 +11,15 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    name: 'Unit Testing / PHP ${{ matrix.php-versions }} @ ${{ matrix.operating-system }}'
+    name: 'Unit Testing'
     steps:
+      - uses: actions/checkout@v2
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.0.6
       - name: Copy .env.example to .env
         run: php -r "file_exists('.env') || copy('.env.testing', '.env');"
-      - name: check where am i
-        run: cd .. && pwd && ls -al
       - name: Install composer dependencies
         run: composer install
       - name: Set required directory permissions
