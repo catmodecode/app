@@ -8,11 +8,11 @@ use App\Services\UserService;
 use Illuminate\Console\Command;
 use Throwable;
 
-class GenerateKeysCommand extends Command
+class GenerateTokensCommand extends Command
 {
   protected $name = 'Generate app rsa keys';
 
-  protected $signature = 'keys:generate';
+  protected $signature = 'tokens:generate';
 
   protected $description = 'Generate rs256 keys for jwt auth';
 
