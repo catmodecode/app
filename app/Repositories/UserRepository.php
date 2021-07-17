@@ -2,19 +2,25 @@
 
 namespace App\Repositories;
 
+use App\Contracts\UserRepositoryContract;
 use App\Exceptions\EmailExistsException;
+use App\Exceptions\FeatureNotYetImplementedException;
 use App\Exceptions\NotEmailException;
 use App\Exceptions\PasswordToWeakException;
+use App\Exceptions\UserNotFoundException;
 use App\Exceptions\WrongLoginOrPasswordException;
 use App\Models\User;
 use Exception;
 use Illuminate\Hashing\HashManager;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 
 /**
  * UserRepository class
  */
-class UserRepository
+class UserRepository implements UserRepositoryContract
 {
     /**
      * @param string $name
@@ -81,7 +87,7 @@ class UserRepository
     public function checkCredintials(string $userEmail, string $password): User
     {
         $user = User::whereEmail($userEmail)->first();
-        
+
         if (!isset($user)) {
             throw new WrongLoginOrPasswordException();
         }
@@ -92,7 +98,66 @@ class UserRepository
         if (!$hashManager->check($password, $user->password)) {
             throw new WrongLoginOrPasswordException();
         }
+
+        return $user;
+    }
+
+    public function getById(int $id): User
+    {
+        /** @var User */
+        $user = User::find($id);
+
+        if (!isset($user)) {
+            throw new UserNotFoundException();
+        }
+
+        return $user;
+    }
+
+    public function getSortedList(string $sort, string $order, int $limit = 0, int $offset = 0): Collection
+    {
+        $limit = $limit <= 0 ? 0 : $limit;
+        $offset = $offset <= 0 ? 0 : $offset;
+
+        $query = User::orderBy($sort, $order);
+        if ($limit > 0) {
+            $query = $query->limit($limit);
+            if ($offset > 0) {
+                $query = $query->offset($offset);
+            }
+        }
+
+        return $query->get();
+    }
+
+    public function search(string $search, int $limit = 0, int $offset = 0): Collection
+    {
+        $limit = $limit <= 0 ? 0 : $limit;
+        $offset = $offset <= 0 ? 0 : $offset;
+        $search = Str::lower($search);
+
+        $query = User::whereRaw('lower(email) like \'%' . $search . "%'")
+            ->orWhereRaw('lower(name) like \'%' . $search . "%'");
+
+        if ($limit > 0) {
+            $query = $query->limit($limit);
+            if ($offset > 0) {
+                $query = $query->offset($offset);
+            }
+        }
+
+        return $query->get();
+    }
+
+    public function update(User|int $user, Collection|array $fields): User
+    {
+        throw new FeatureNotYetImplementedException('You cant edit users right now');
         
         return $user;
+    }
+
+    public function delete(User|int $user): bool
+    {
+        return $user->delete();
     }
 }

@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Exceptions\EmailExistsException;
 use App\Models\User;
-use App\Repositories\UserRepository;
 use Illuminate\Console\Command;
 use Throwable;
 

@@ -68,6 +68,11 @@ $app->singleton(
     App\Console\Kernel::class
 );
 
+$app->singleton(
+    App\Contracts\UserRepositoryContract::class,
+    App\Repositories\UserRepository::class
+);
+
 /*
 |--------------------------------------------------------------------------
 | Register Config Files

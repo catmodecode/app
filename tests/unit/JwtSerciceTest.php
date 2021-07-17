@@ -1,8 +1,7 @@
 <?php
 
-use App\Models\User;
+use App\Contracts\UserRepositoryContract;
 use App\Services\JwtService;
-use App\Repositories\UserRepository;
 use Carbon\Carbon;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\SignatureInvalidException;
@@ -15,8 +14,11 @@ class JwtSerciceTest extends \Codeception\Test\Unit
      */
     protected $tester;
 
+    protected UserRepositoryContract $userRepository;
+
     protected function _before()
     {
+        $this->userRepository = app()->make(UserRepositoryContract::class);
     }
 
     protected function _after()
@@ -58,8 +60,8 @@ class JwtSerciceTest extends \Codeception\Test\Unit
             ->getMock();
         $jwtService->method('getAccessExpired')
             ->willReturn(Carbon::now());
-        $userService = new UserRepository();
-        $testUser = $userService->create('testUser', 'test@mail.ru', '123qweR%');
+        $userRepository = $this->userRepository;
+        $testUser = $userRepository->create('testUser', 'test@mail.ru', '123qweR%');
         $userJwt = $jwtService->createUserJwt($testUser, collect([]));
         $jwtService->decode($userJwt->get('access'));
     }
@@ -67,7 +69,7 @@ class JwtSerciceTest extends \Codeception\Test\Unit
     public function testGenerateUserJwtWrongSignature()
     {
         $this->expectException(SignatureInvalidException::class);
-        $userService = new UserRepository();
+        $userRepository = new $this->userRepository;
         /** @var JwtService|MockObject */
         $jwtService = $this->getMockBuilder(JwtService::class)
             ->onlyMethods(['getPublicKey'])
@@ -84,7 +86,7 @@ class JwtSerciceTest extends \Codeception\Test\Unit
             return $publicKeyPem;
         });
 
-        $testUser = $userService->create('testUser', 'test1@mail.ru', '123qweR%');
+        $testUser = $userRepository->create('testUser', 'test1@mail.ru', '123qweR%');
         $userJwt = $jwtService->createUserJwt($testUser, collect([]));
         $jwtService->decode($userJwt->get('access'));
     }
