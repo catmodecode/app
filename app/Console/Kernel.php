@@ -3,7 +3,8 @@
 namespace App\Console;
 
 use App\Console\Commands\CreateUserCommand;
-use App\Console\Commands\GenerateKeysCommand;
+use App\Console\Commands\GenerateTokensCommand;
+use App\Console\Commands\KeyGenerateCommand;
 use App\Console\Commands\Test;
 use Illuminate\Console\Scheduling\Schedule;
 use Laravel\Lumen\Console\Kernel as ConsoleKernel;
@@ -17,7 +18,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         CreateUserCommand::class,
-        GenerateKeysCommand::class,
+        GenerateTokensCommand::class,
+        KeyGenerateCommand::class,
     ];
 
     /**

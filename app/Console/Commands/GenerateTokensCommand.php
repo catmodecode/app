@@ -8,11 +8,11 @@ use App\Repositories\UserRepository;
 use Illuminate\Console\Command;
 use Throwable;
 
-class GenerateKeysCommand extends Command
+class GenerateTokensCommand extends Command
 {
   protected $name = 'Generate app rsa keys';
 
-  protected $signature = 'keys:generate';
+  protected $signature = 'tokens:generate';
 
   protected $description = 'Generate rs256 keys for jwt auth';
 
@@ -27,8 +27,12 @@ class GenerateKeysCommand extends Command
     $privateKey = openssl_pkey_get_private($rsaKey);
     openssl_pkey_export($privateKey, $pem);
     $publicKeyPem = openssl_pkey_get_details($privateKey)['key'];
-    file_put_contents(storage_path() . '/tokens/jwtRS256.key', $pem);
-    file_put_contents(storage_path() . '/tokens/jwtRS256.key.pub', $publicKeyPem);
+    $path = storage_path() . '/tokens';
+    if (!file_exists($path)) {
+      mkdir($path, 0777, true);
+    }
+    file_put_contents($path . '/jwtRS256.key', $pem);
+    file_put_contents($path . '/jwtRS256.key.pub', $publicKeyPem);
     $this->line('Keys successfully generated');
     return Command::SUCCESS;
   }
