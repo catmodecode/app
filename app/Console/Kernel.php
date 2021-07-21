@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Console\Commands\CreateUserCommand;
+use App\Console\Commands\GenerateExceptionCommand;
 use App\Console\Commands\GenerateTokensCommand;
 use App\Console\Commands\KeyGenerateCommand;
 use App\Console\Commands\Test;
@@ -20,6 +21,7 @@ class Kernel extends ConsoleKernel
         CreateUserCommand::class,
         GenerateTokensCommand::class,
         KeyGenerateCommand::class,
+        GenerateExceptionCommand::class,
     ];
 
     /**
