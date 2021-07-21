@@ -2,13 +2,26 @@
 
 namespace App\Contracts;
 
+use App\Exceptions\User\WrongLoginOrPasswordException;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
+/**
+ * @method User create(string $name, string $email, string $plainPassword)
+ * @method bool validateEmail(string $email)
+ * @method bool emailExists(string $email)
+ * @method bool validatePassword(string $password)
+ * @method User checkCredintials(string $userEmail, string $password)
+ * @method User getById(int $id)
+ * @method Collection getSortedList(string $sort, string $order, int $limit = 0, int $offset = 0)
+ * @method Collection search(string $search, int $limit = 0, int $offset = 0)
+ * @method User update(User|int $user, Collection|array $fields)
+ * @method bool delete(User|int $user)
+ */
 interface UserRepositoryContract
 {
     /**
-     * Create new user with base parameters
+     * Создание пользователя с основными параметрами
      * 
      * @param string $name
      * @param string $email
@@ -21,7 +34,7 @@ interface UserRepositoryContract
     ): User;
 
     /**
-     * Validate email, false on failed
+     * Валидация почты
      *
      * @param string $email
      * @return boolean
@@ -29,7 +42,7 @@ interface UserRepositoryContract
     public function validateEmail(string $email): bool;
 
     /**
-     * Find if email already in database
+     * Проверка на дубликат почты
      *
      * @param string $email
      * @return boolean
@@ -37,7 +50,7 @@ interface UserRepositoryContract
     public function emailExists(string $email): bool;
 
     /**
-     * Validate email for strength, special chars etc
+     * Валидация длины пароля, спец символов и т.д.
      *
      * @param string $password
      * @return boolean
@@ -45,7 +58,7 @@ interface UserRepositoryContract
     public function validatePassword(string $password): bool;
 
     /**
-     * Returns user match credintials
+     * Проверка логина и пароля и возврат пользователя с соответствующими данными
      *
      * @param string $userEmail
      * @param string $password
@@ -56,7 +69,7 @@ interface UserRepositoryContract
     public function checkCredintials(string $userEmail, string $password): User;
 
     /**
-     * Get one user by id
+     * Получение пользователя по Id
      *
      * @param integer $id
      * @return User
@@ -64,7 +77,7 @@ interface UserRepositoryContract
     public function getById(int $id): User;
 
     /**
-     * Sort list of all users by one of columns
+     * Отсортированый список по полю
      *
      * @param string $sort
      * @param string $order
@@ -75,7 +88,7 @@ interface UserRepositoryContract
     public function getSortedList(string $sort, string $order, int $limit = 0, int $offset = 0): Collection;
 
     /**
-     * Search by many fields
+     * Поиск по полям
      *
      * @param string $search
      * @param integer $limit
@@ -85,7 +98,7 @@ interface UserRepositoryContract
     public function search(string $search, int $limit = 0, int $offset = 0): Collection;
 
     /**
-     * Update fields presented in $fields param
+     * Изменение пользователя по переданным полям
      * 
      * @param User|int $user
      * @param Collection|array $fields
@@ -94,7 +107,7 @@ interface UserRepositoryContract
     public function update(User|int $user, Collection|array $fields): User;
 
     /**
-     * Delete user
+     * Удаление пользователя
      * 
      * @param User|int $user
      */

@@ -8,7 +8,7 @@ use App\Exceptions\FeatureNotYetImplementedException;
 use App\Exceptions\NotEmailException;
 use App\Exceptions\PasswordToWeakException;
 use App\Exceptions\UserNotFoundException;
-use App\Exceptions\WrongLoginOrPasswordException;
+use App\Exceptions\User\WrongLoginOrPasswordException;
 use App\Models\User;
 use Exception;
 use Illuminate\Hashing\HashManager;
@@ -158,6 +158,7 @@ class UserRepository implements UserRepositoryContract
 
     public function delete(User|int $user): bool
     {
+        $user = is_int($user) ? $this->getById($user) : $user;
         return $user->delete();
     }
 }

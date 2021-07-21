@@ -3,8 +3,8 @@ namespace Tests;
 
 use App\Contracts\UserRepositoryContract;
 use App\Exceptions\FeatureNotYetImplementedException;
-use App\Exceptions\UserNotFoundException;
-use App\Exceptions\WrongLoginOrPasswordException;
+use App\Exceptions\User\UserNotFoundException;
+use App\Exceptions\User\WrongLoginOrPasswordException;
 use App\Models\User;
 
 use function PHPUnit\Framework\assertEquals;
@@ -42,7 +42,7 @@ class UserRepositoryTest extends \Codeception\Test\Unit
         $this->assertInstanceOf(
             User::class,
             $user,
-            sprintf('Expected object of class %s, %s got', User::class, get_class($user))
+            sprintf('Ожидался объект класса %s, %s получен', User::class, get_class($user))
         );
     }
 
@@ -57,17 +57,12 @@ class UserRepositoryTest extends \Codeception\Test\Unit
         $password = 'pass12345';
         
         $user = $userRepository->create($name, $email, $password);
-        $this->assertInstanceOf(
-            User::class,
-            $user,
-            sprintf('Expected object of class %s, %s got', User::class, get_class($user))
-        );
 
         /** @var \Illuminate\Hashing\HashManager */
         $hash = app('hash');
 
         $userFromCredintials = $userRepository->checkCredintials($email, $password);
-        assertEquals($user->id, $userFromCredintials->id, 'Wrong user from credintials');
+        assertEquals($user->id, $userFromCredintials->id, 'Не прошла проверка пользователь пароль, вернулся другой пользователь');
         $this->expectException(WrongLoginOrPasswordException::class);
         $userFromCredintials = $userRepository->checkCredintials($email, '123');
     }
@@ -82,7 +77,7 @@ class UserRepositoryTest extends \Codeception\Test\Unit
         $user = $userRepository->create($name, $email, $password);
 
         $recievedUser = $userRepository->getById($user->id);
-        $this->assertEquals($email, $recievedUser->email);
+        $this->assertEquals($email, $recievedUser->email, 'Поиск выдал не того пользователя');
     }
 
     public function testUserSearch()
@@ -101,11 +96,11 @@ class UserRepositoryTest extends \Codeception\Test\Unit
         $userRepository->create($name3, $email3, $password);
 
         $searchList1 = $userRepository->search('special');
-        $this->assertCount(3, $searchList1);
+        $this->assertCount(3, $searchList1, sprintf('Ожидалось 3 пользователя, пришло %d', $searchList1->count()));
         $searchList2 = $userRepository->search('only.ru');
-        $this->assertCount(3, $searchList2);
+        $this->assertCount(3, $searchList2, sprintf('Ожидалось 3 пользователя, пришло %d', $searchList2->count()));
         $searchList3 = $userRepository->search('@only.ru');
-        $this->assertCount(2, $searchList3);
+        $this->assertCount(2, $searchList3, sprintf('Ожидалось 2 пользователя, пришло %d', $searchList3->count()));
     }
 
     public function testUserEditIsRestrictedForNow()
@@ -122,19 +117,39 @@ class UserRepositoryTest extends \Codeception\Test\Unit
         $userRepository = $this->userRepository;
         $name = 'userName';
         $email = 'testCheckUserSoftDelete@mail.ru';
+        $email2 = 'testCheckUserSoftDelete2@mail.ru';
         $password = 'pass12345';
 
         $user = $userRepository->create($name, $email, $password);
+        $user2 = $userRepository->create($name, $email2, $password);
 
         $userId = $user->id;
 
         $deleteResult = $userRepository->delete($user);
-        $this->assertTrue($deleteResult);
+        $this->assertTrue($deleteResult, 'Пользователь не удалился');
 
         $this->expectException(UserNotFoundException::class);
         $userRepository->getById($userId);
 
         $trashedUser = User::withTrashed()->find($userId);
-        $this->assertEquals($userId, $trashedUser->id);
+        $this->assertEquals($userId, $trashedUser->id, 'Пользователь не удалился мягко');
+
+        $trashedUser->forceDelete();
+        $deleted = User::withTrashed()->find($userId);
+        $this->assertNull($deleted, 'Пользователь не был удален принудительным удалением');
+
+        $user2Id = $user2->id;
+        $deleteResult = $userRepository->delete($user2Id);
+        $this->assertTrue($deleteResult, 'Пользователь переданный через int не удалился');
+
+        $this->expectException(UserNotFoundException::class);
+        $userRepository->getById($userId);
+
+        $trashedUser = User::withTrashed()->find($userId);
+        $this->assertEquals($userId, $trashedUser->id, 'Пользователь переданный через int  не удалился мягко');
+
+        $trashedUser->forceDelete();
+        $deleted = User::withTrashed()->find($userId);
+        $this->assertNull($deleted, 'Пользователь переданный через int не был удален принудительным удалением');
     }
 }
