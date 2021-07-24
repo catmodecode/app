@@ -5,10 +5,12 @@ namespace App\Repositories;
 use App\Contracts\UserRepositoryContract;
 use App\Exceptions\EmailExistsException;
 use App\Exceptions\FeatureNotYetImplementedException;
-use App\Exceptions\NotEmailException;
+use App\Exceptions\Group\GroupNotFoundException;
+use App\Exceptions\User\NotEmailException;
 use App\Exceptions\PasswordToWeakException;
-use App\Exceptions\UserNotFoundException;
+use App\Exceptions\User\UserNotFoundException;
 use App\Exceptions\User\WrongLoginOrPasswordException;
+use App\Models\Group;
 use App\Models\User;
 use Exception;
 use Illuminate\Hashing\HashManager;
@@ -160,5 +162,18 @@ class UserRepository implements UserRepositoryContract
     {
         $user = is_int($user) ? $this->getById($user) : $user;
         return $user->delete();
+    }
+
+    public function addToGroup(User|int $user, Group|int $group): void
+    {
+        /** @var User */
+        $user = is_int($user) ? $this->getById($user) : $user;
+        /** @var Group */
+        $group = is_int($group) ? $group : $group->id;
+        if (!isset($group)) {
+            throw new GroupNotFoundException();
+        }
+        $user->groups()->attach($group);
+        $user->save();
     }
 }

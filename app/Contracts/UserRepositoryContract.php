@@ -3,6 +3,7 @@
 namespace App\Contracts;
 
 use App\Exceptions\User\WrongLoginOrPasswordException;
+use App\Models\Group;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
@@ -71,7 +72,7 @@ interface UserRepositoryContract
     /**
      * Получение пользователя по Id
      *
-     * @param integer $id
+     * @param int $id
      * @return User
      */
     public function getById(int $id): User;
@@ -81,8 +82,8 @@ interface UserRepositoryContract
      *
      * @param string $sort
      * @param string $order
-     * @param integer $limit
-     * @param integer $offset
+     * @param int $limit
+     * @param int $offset
      * @return Collection
      */
     public function getSortedList(string $sort, string $order, int $limit = 0, int $offset = 0): Collection;
@@ -91,8 +92,8 @@ interface UserRepositoryContract
      * Поиск по полям
      *
      * @param string $search
-     * @param integer $limit
-     * @param integer $offset
+     * @param int $limit
+     * @param int $offset
      * @return Collection
      */
     public function search(string $search, int $limit = 0, int $offset = 0): Collection;
@@ -112,4 +113,13 @@ interface UserRepositoryContract
      * @param User|int $user
      */
     public function delete(User|int $user): bool;
+
+    /**
+     * Добавить пользователя в группу
+     * 
+     * @param User|int $user
+     * @param Group|int $group
+     * @return bool
+     */
+    public function addToGroup(User|int $user, Group|int $group): void;
 }

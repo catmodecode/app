@@ -44,6 +44,11 @@ class User extends Model implements AuthorizableContract
         'password',
     ];
 
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class, 'user_group');
+    }
+
     public function setPasswordAttribute($plainPassword)
     {
         $this->attributes['password'] = User::getHashPassword($plainPassword);

@@ -3,7 +3,9 @@
 namespace App\Repositories;
 
 use App\Contracts\GroupRepositoryContract;
+use App\Exceptions\Group\GroupNotFoundException;
 use App\Models\Group;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -26,12 +28,19 @@ class GroupRepository implements GroupRepositoryContract
     /**
      * Получение записи по id
      *
-     * @param integer $id
+     * @param int $id
      * @return Group
+     * 
+     * @throws GroupNotFoundException
      */
     public function getById(int $id): Group
     {
-        return Group::find($id);
+        $group = Group::find($id);
+        if (!isset($group)) {
+            throw new GroupNotFoundException();
+        }
+
+        return $group;
     }
 
     /**
@@ -39,8 +48,8 @@ class GroupRepository implements GroupRepositoryContract
      *
      * @param string $sort
      * @param string $order
-     * @param integer $limit
-     * @param integer $offset
+     * @param int $limit
+     * @param int $offset
      * @return Collection
      */
     public function getSortedList(string $sort, string $order, int $limit = 0, int $offset = 0): Collection
@@ -63,8 +72,8 @@ class GroupRepository implements GroupRepositoryContract
      * Поиск по названию
      *
      * @param string $search
-     * @param integer $limit
-     * @param integer $offset
+     * @param int $limit
+     * @param int $offset
      * @return Collection
      */
     public function search(string $search, int $limit = 0, int $offset = 0): Collection

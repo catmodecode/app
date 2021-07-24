@@ -3,6 +3,7 @@
 namespace App\Contracts;
 
 use App\Models\Group;
+use App\Models\User;
 use Illuminate\Support\Collection;
 
 /**
@@ -26,7 +27,7 @@ interface GroupRepositoryContract
     /**
      * Получение записи по id
      *
-     * @param integer $id
+     * @param int $id
      * @return Group
      */
     public function getById(int $id): Group;
@@ -36,8 +37,8 @@ interface GroupRepositoryContract
      *
      * @param string $sort
      * @param string $order
-     * @param integer $limit
-     * @param integer $offset
+     * @param int $limit
+     * @param int $offset
      * @return Collection
      */
     public function getSortedList(string $sort, string $order, int $limit = 0, int $offset = 0): Collection;
@@ -46,8 +47,8 @@ interface GroupRepositoryContract
      * Поиск по названию
      *
      * @param string $search
-     * @param integer $limit
-     * @param integer $offset
+     * @param int $limit
+     * @param int $offset
      * @return Collection
      */
     public function search(string $search, int $limit = 0, int $offset = 0): Collection;

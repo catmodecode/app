@@ -2,6 +2,7 @@
 namespace Tests;
 
 use App\Contracts\GroupRepositoryContract;
+use App\Exceptions\Group\GroupNotFoundException;
 use App\Models\Group;
 
 use function PHPUnit\Framework\assertEquals;
@@ -87,7 +88,12 @@ class GroupRepositoryTest extends \Codeception\Test\Unit
     {
         $groupRepository = $this->groupRepository;
         $group = $groupRepository->create('delete');
+        $groupId = $group->id;
+        $group->delete();
 
-
+        $this->expectException(GroupNotFoundException::class);
+        $groupRepository->getById($groupId);
+        $trash = Group::withTrashed()->find($groupId);
+        $this->assertEquals($groupId, $trash->id);
     }
 }

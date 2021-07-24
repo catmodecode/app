@@ -1,6 +1,7 @@
 <?php
 namespace Tests;
 
+use App\Contracts\GroupRepositoryContract;
 use App\Contracts\UserRepositoryContract;
 use App\Exceptions\FeatureNotYetImplementedException;
 use App\Exceptions\User\UserNotFoundException;
@@ -151,5 +152,22 @@ class UserRepositoryTest extends \Codeception\Test\Unit
         $trashedUser->forceDelete();
         $deleted = User::withTrashed()->find($userId);
         $this->assertNull($deleted, 'Пользователь переданный через int не был удален принудительным удалением');
+    }
+
+    public function testAddUserToGroup()
+    {
+        $userRepository = $this->userRepository;
+        /** @var GroupRepositoryContract */
+        $groupRepository = app()->make(GroupRepositoryContract::class);
+        $user = $userRepository->create('UserToGroup', 'usertogroup@mail.ru', '12321qwe!@');
+        $group = $groupRepository->create('groupToAdd');
+        $group2 = $groupRepository->create('groupToAdd2');
+        $userRepository->addToGroup($user, $group);
+        $userRepository->addToGroup($user, $group2);
+
+        $resultUser = $userRepository->getById($user->id);
+        $relatedGroups = $resultUser->groups;
+        $this->assertCount(1, $relatedGroups->filter(fn($v) => $v->id === $group->id));
+        $this->assertCount(1, $relatedGroups->filter(fn ($v) => $v->id === $group2->id));
     }
 }

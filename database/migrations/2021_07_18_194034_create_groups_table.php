@@ -21,8 +21,7 @@ class CreateGroupsTable extends Migration
             $table->softDeletes();
         });
 
-
-        Schema::create('users_groups', function (Blueprint $table) {
+        Schema::create('user_group', function (Blueprint $table) {
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('group_id');
 
@@ -38,7 +37,7 @@ class CreateGroupsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users_groups');
+        Schema::dropIfExists('user_group');
         Schema::dropIfExists('groups');
     }
 }
