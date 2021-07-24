@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Exceptions;
+namespace App\Exceptions\User;
 
 use Exception;
 
 class NotEmailException extends Exception
 {
-
 }

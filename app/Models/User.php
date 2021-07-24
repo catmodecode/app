@@ -8,6 +8,7 @@ use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Lumen\Auth\Authorizable;
 
 /**
@@ -23,6 +24,7 @@ class User extends Model implements AuthorizableContract
 {
     use Authorizable;
     use HasFactory;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -42,12 +44,17 @@ class User extends Model implements AuthorizableContract
         'password',
     ];
 
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class, 'user_group');
+    }
+
     public function setPasswordAttribute($plainPassword)
     {
         $this->attributes['password'] = User::getHashPassword($plainPassword);
     }
 
-    public static function getHashPassword(string $plainPassword): string
+    protected static function getHashPassword(string $plainPassword): string
     {
         return app('hash')->make($plainPassword);
     }
