@@ -2,24 +2,27 @@
 
 namespace App\Services;
 
+use App\Contracts\TokenRepositoryContract;
+use App\Contracts\UserRepositoryContract;
+use App\Models\Token;
 use App\Models\User;
 use Carbon\Carbon;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Collection;
 
-/**
- * JwtService class
- * 
- * @method User create()
- */
 class JwtService
 {
     private const ALG = 'RS256';
     private string $privateKey;
     private string $publicKey;
+    private UserRepositoryContract $userRepository;
+    private TokenRepositoryContract $tokenRepository;
 
     public function __construct()
     {
+        $this->userRepository = app()->make(UserRepositoryContract::class);
+        $this->tokenRepository = app()->make(TokenRepositoryContract::class);
+
         $this->privateKey = file_get_contents(storage_path() . '/tokens/jwtRS256.key');
         $this->publicKey = file_get_contents(storage_path() . '/tokens/jwtRS256.key.pub');
     }
@@ -36,12 +39,35 @@ class JwtService
 
     protected function getAccessExpired(): Carbon
     {
-        return Carbon::now()->addSeconds(config('jwt.access_lifetime'));
+        return Carbon::now('UTC')->addSeconds(config('jwt.access_lifetime'));
     }
 
     protected function getRefreshExpired(): Carbon
     {
-        return Carbon::now()->addSeconds(config('jwt.refresh_lifetime'));
+        return Carbon::now('UTC')->addSeconds(config('jwt.refresh_lifetime'));
+    }
+
+    /**
+     * Получение пользователя из токена
+     *
+     * @param string $jwt
+     * @return User
+     * @throws InvalidArgumentException — Provided JWT was empty
+     * @throws UnexpectedValueException — Provided JWT was invalid
+     * @throws SignatureInvalidException
+     * Provided JWT was invalid because the signature verification failed
+     * @throws BeforeValidException
+     * Provided JWT is trying to be used before it's eligible as defined by 'nbf'
+     * @throws BeforeValidException
+     * Provided JWT is trying to be used before it's been created as defined by 'iat'
+     * @throws ExpiredException
+     * Provided JWT has since expired, as defined by the 'exp' claim
+     */
+    public function getUserFromToken(string $jwt): User
+    {
+        $userId = $this->decode($jwt)?->id;
+        $userRepository = app()->make(UserRepositoryContract::class);
+        return $userRepository->getById($userId);
     }
 
     /**
@@ -76,9 +102,9 @@ class JwtService
         return JWT::encode($payload, $this->getPrivateKey(), JwtService::ALG);
     }
 
-    public function setExp(object|array $payload, Carbon $exp): object|array
+    protected function setExp(object|array $payload, Carbon $exp): object|array
     {
-        $iatStamp = Carbon::now()->timestamp;
+        $iatStamp = Carbon::now('UTC')->timestamp;
         $expStamp = $exp->timestamp;
         if (is_array($payload)) {
             $payload['iat'] = $iatStamp;
@@ -90,28 +116,83 @@ class JwtService
         return $payload;
     }
 
-    public function createUserJwt(User $user, Collection $groups): Collection
+    /**
+     * Создание токенов access и refresh
+     *
+     * @param User|int $user
+     * @param Collection $groups
+     * @return string
+     */
+    public function generateAccessJwt(User|int $user): string
     {
+        $user = is_int($user) ? $this->userRepository->getById($user) : $user;
+        /** @var Collection */
+        $groups = $user->groups->pluck('id');
         $accessPayload = [
-            'user' => [
-                'id' => $user->id,
-                'email' => $user->email,
-            ],
+            'user_id'=> $user->id,
+            'groups' => $groups->toArray()
         ];
 
-        
-        $refreshPayload = [
-            'user_id' => $user->id
-        ];
         $accessPayload = $this->setExp($accessPayload, $this->getAccessExpired());
-        $refreshPayload = $this->setExp($refreshPayload, $this->getRefreshExpired());
 
         $accessJwt = $this->encode($accessPayload);
-        $refreashJwt = $this->encode($refreshPayload);
 
-        return collect([
-            'access' => $accessJwt,
-            'refresh' => $refreashJwt,
-        ]);
+        return $accessJwt;
+    }
+
+    public function generateAndStoreRefreshJwt(User|int $user): Token
+    {
+        $user = is_int($user) ? $this->userRepository->getById($user) : $user;
+
+        $refreshPayload = [
+            'user_id' => $user->id,
+        ];
+
+        $expire = $this->getRefreshExpired();
+        $refreshPayload = $this->setExp($refreshPayload, $expire);
+        $refreshJwt = $this->encode($refreshPayload);
+
+        $token = $this->tokenRepository->create($refreshJwt, $user, $expire);
+
+        return $token;
+    }
+
+    /**
+     * Использовать и удалить токен
+     *
+     * @param string $token
+     * @return Token
+     * 
+     * @throws TokenNotFoundException
+     * @throws ExpiredException
+     * Provided JWT has since expired, as defined by the 'exp' clai
+     */
+    public function useToken(string $tokenText): Token
+    {
+        $this->decode($tokenText);
+        return $this->tokenRepository->useToken($tokenText);
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param string $jwtToken
+     * @return float|int|string
+     * 
+     * @throws InvalidArgumentException — Provided JWT was empty
+     * @throws UnexpectedValueException — Provided JWT was invalid
+     * @throws SignatureInvalidException
+     * Provided JWT was invalid because the signature verification failed
+     * @throws BeforeValidException
+     * Provided JWT is trying to be used before it's eligible as defined by 'nbf'
+     * @throws BeforeValidException
+     * Provided JWT is trying to be used before it's been created as defined by 'iat'
+     * @throws ExpiredException
+     * Provided JWT has since expired, as defined by the 'exp' claim
+     */
+    public function getExpired(string $jwtToken): float|int|string
+    {
+        $decoded = $this->decode($jwtToken);
+        return $decoded->exp;
     }
 }

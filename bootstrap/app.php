@@ -78,6 +78,11 @@ $app->singleton(
     App\Repositories\GroupRepository::class
 );
 
+$app->singleton(
+    App\Contracts\TokenRepositoryContract::class,
+    App\Repositories\TokenRepository::class
+);
+
 /*
 |--------------------------------------------------------------------------
 | Register Config Files

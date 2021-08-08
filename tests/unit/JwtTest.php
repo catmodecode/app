@@ -1,13 +1,15 @@
 <?php
 
+use App\Contracts\TokenRepositoryContract;
 use App\Contracts\UserRepositoryContract;
+use App\Models\Token;
 use App\Services\JwtService;
 use Carbon\Carbon;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\SignatureInvalidException;
 use PHPUnit\Framework\MockObject\MockObject;
 
-class JwtSerciceTest extends \Codeception\Test\Unit
+class JwtTest extends \Codeception\Test\Unit
 {
     /**
      * @var \UnitTester
@@ -15,10 +17,14 @@ class JwtSerciceTest extends \Codeception\Test\Unit
     protected $tester;
 
     protected UserRepositoryContract $userRepository;
+    protected JwtService $jwtService;
+    protected TokenRepositoryContract $tokenRepository;
 
     protected function _before()
     {
         $this->userRepository = app()->make(UserRepositoryContract::class);
+        $this->jwtService = app()->make(JwtService::class);
+        $this->tokenRepository = app()->make(TokenRepositoryContract::class);
     }
 
     protected function _after()
@@ -28,7 +34,7 @@ class JwtSerciceTest extends \Codeception\Test\Unit
     // tests
     public function testEncodeDecodeJwt()
     {
-        $jwtService = new JwtService();
+        $jwtService = $this->jwtService;
         $payload = [
             'bool' => true,
             'number' => 5,
@@ -59,11 +65,11 @@ class JwtSerciceTest extends \Codeception\Test\Unit
             ->onlyMethods(['getAccessExpired'])
             ->getMock();
         $jwtService->method('getAccessExpired')
-            ->willReturn(Carbon::now());
+            ->willReturn(Carbon::now('UTC'));
         $userRepository = $this->userRepository;
         $testUser = $userRepository->create('testUser', 'test@mail.ru', '123qweR%');
-        $userJwt = $jwtService->createUserJwt($testUser, collect([]));
-        $jwtService->decode($userJwt->get('access'));
+        $userJwt = $jwtService->generateAccessJwt($testUser);
+        $jwtService->decode($userJwt);
     }
 
     public function testGenerateUserJwtWrongSignature()
@@ -87,7 +93,36 @@ class JwtSerciceTest extends \Codeception\Test\Unit
         });
 
         $testUser = $userRepository->create('testUser', 'test1@mail.ru', '123qweR%');
-        $userJwt = $jwtService->createUserJwt($testUser, collect([]));
-        $jwtService->decode($userJwt->get('access'));
+        $userJwt = $jwtService->generateAccessJwt($testUser, collect([]));
+        $jwtService->decode($userJwt);
+    }
+
+    public function testStoreRefreshTokens()
+    {
+        $user = $this->userRepository
+            ->create('storeRefreshToken', 'storeRefreshToken@mail.ru', '123qwe!@');
+        $token = $this->jwtService->generateAndStoreRefreshJwt($user);
+        $stored = Token::where('token', $token->token)->first();
+        $this->assertNotNull($stored, 'Сгенерированный и сохраненный токен не найден в базе');
+        $this->jwtService->useToken($token->token);
+        $deleted = Token::where('token', $token->token)->first();
+        $this->assertNotNull($deleted, 'Токен который должен быть удален, остался');
+    }
+
+    public function testExpireRefreshToken()
+    {
+        /** @var JwtService|MockObject */
+        $jwtService = $this->getMockBuilder(JwtService::class)
+            ->onlyMethods(['getRefreshExpired'])
+            ->getMock();
+        $jwtService->method('getRefreshExpired')
+            ->willReturn(Carbon::now('UTC'));
+        
+        $userRepository = $this->userRepository;
+        $user = $userRepository->create('testExpireRefreshToken', 'testExpireRefreshToken@mail.ru', '123qwe!@123qwe!@');
+        $generatedToken = $jwtService->generateAndStoreRefreshJwt($user);
+        
+        $this->expectException(ExpiredException::class);
+        $jwtService->useToken($generatedToken->token);
     }
 }

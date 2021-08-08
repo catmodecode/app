@@ -9,6 +9,7 @@ use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 use Laravel\Lumen\Auth\Authorizable;
 
 /**
@@ -18,6 +19,8 @@ use Laravel\Lumen\Auth\Authorizable;
  * @property string $name
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property Group $group
+ * @property Collection $tokens
  * @method string getHashPassword()
  */
 class User extends Model implements AuthorizableContract
@@ -47,6 +50,11 @@ class User extends Model implements AuthorizableContract
     public function groups()
     {
         return $this->belongsToMany(Group::class, 'user_group');
+    }
+
+    public function tokens()
+    {
+        return $this->hasMany(Token::class, 'tokens');
     }
 
     public function setPasswordAttribute($plainPassword)

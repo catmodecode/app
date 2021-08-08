@@ -1,5 +1,4 @@
 <?php
-
 define('LUMEN_START', microtime(true));
 
 /*

@@ -2,6 +2,7 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SpaController;
 use Laravel\Lumen\Http\Request;
@@ -25,4 +26,8 @@ $router->get('{all:.*}', SpaController::class . '@index');
 
 $router->group(['prefix' => 'api'], function() use ($router) {
   $router->post('register', RegisterController::class . '@register');
+  $router->group(['prefix' => 'auth'], function() use ($router) {
+    $router->post('login', AuthController::class . '@login');
+    $router->post('refresh', AuthController::class . '@refresh');
+  });
 });
