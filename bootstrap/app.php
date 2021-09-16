@@ -6,16 +6,16 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 $env = env('APP_ENV');
 if (!isset($env) && isset($argv)) {
-    for ($i = 0; $i < count($argv); $i ++) {
+    for ($i = 0; $i < count($argv); $i++) {
         if (str_contains($argv[$i], 'env')) {
             $env = array_pop(explode('=', $argv[$i]));
         }
     }
 }
-$file = '.env.'.$env;
+$file = '.env.' . $env;
 
 // If the specific environment file doesn't exist, null out the $file variable.
-if (!file_exists(dirname(__DIR__).'/'.$file)) {
+if (!file_exists(dirname(__DIR__) . '/' . $file)) {
     $file = null;
 }
 
@@ -144,7 +144,7 @@ $app->middleware([MeasureExecutionTime::class]);
 |
 */
 
-$app->router->group([], function ($router) {
+$app->router->group(['prefix' => 'api', 'as' => 'api'], function ($router) {
     require __DIR__ . '/../routes/web.php';
 });
 

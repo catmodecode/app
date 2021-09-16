@@ -7,8 +7,8 @@ use App\Models\User;
 
 class UserController extends Controller
 {
-    public function get(User $user)
+    public function getSelf()
     {
-        return
+        
     }
 }

@@ -3,8 +3,12 @@
 /** @var \Laravel\Lumen\Routing\Router $router */
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\NamedRoutesController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SpaController;
+use App\Http\Controllers\User\UserController;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Route;
 use Laravel\Lumen\Http\Request;
 
 /*
@@ -18,16 +22,14 @@ use Laravel\Lumen\Http\Request;
 |
 */
 
-$router->get('phpinfo', function() {
-  return phpinfo();
+$router->get('routes', ['as' => 'routes', 'uses' => NamedRoutesController::class . '@get']);
+$router->post('register', ['uses' => RegisterController::class . '@register', 'as' => 'register']);
+
+$router->group(['prefix' => 'auth', 'as' => 'auth'], function () use ($router) {
+    $router->post('login', ['uses' => AuthController::class . '@login', 'as' => 'login']);
+    $router->post('refresh', ['uses' => AuthController::class . '@refresh', 'as' => 'refresh']);
 });
 
-$router->get('{all:.*}', SpaController::class . '@index');
-
-$router->group(['prefix' => 'api'], function() use ($router) {
-  $router->post('register', RegisterController::class . '@register');
-  $router->group(['prefix' => 'auth'], function() use ($router) {
-    $router->post('login', AuthController::class . '@login');
-    $router->post('refresh', AuthController::class . '@refresh');
-  });
+$router->group(['prefix' => 'users', 'as' => 'users'], function () use ($router) {
+    $router->get('self', ['uses' => UserController::class . '@getSelf', 'as' => 'getSelf']);
 });

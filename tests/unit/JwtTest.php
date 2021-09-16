@@ -106,7 +106,7 @@ class JwtTest extends \Codeception\Test\Unit
         $this->assertNotNull($stored, 'Сгенерированный и сохраненный токен не найден в базе');
         $this->jwtService->useToken($token->token);
         $deleted = Token::where('token', $token->token)->first();
-        $this->assertNotNull($deleted, 'Токен который должен быть удален, остался');
+        $this->assertNull($deleted, 'Токен который должен быть удален, остался');
     }
 
     public function testExpireRefreshToken()
