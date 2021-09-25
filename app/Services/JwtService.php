@@ -129,7 +129,7 @@ class JwtService
         /** @var Collection */
         $groups = $user->groups->pluck('id');
         $accessPayload = [
-            'user_id'=> $user->id,
+            'user_id' => $user->id,
             'groups' => $groups->toArray()
         ];
 
@@ -146,6 +146,7 @@ class JwtService
 
         $refreshPayload = [
             'user_id' => $user->id,
+            'timestamp' => microtime(true),
         ];
 
         $expire = $this->getRefreshExpired();
