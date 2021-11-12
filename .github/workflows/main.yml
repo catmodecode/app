@@ -28,9 +28,5 @@ jobs:
         run: php artisan key:generate
       - name: Generate sha tokens
         run: php artisan tokens:generate
-      - name: Install NPM dependencies
-        run: npm i
-      - name: Minify CSS and JS files
-        run: npm run build
       - name: Run unit tests via Codeception
         run: ./vendor/bin/codecept run unit
