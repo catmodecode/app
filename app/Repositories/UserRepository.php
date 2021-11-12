@@ -3,21 +3,25 @@
 namespace App\Repositories;
 
 use App\Contracts\UserRepositoryContract;
-use App\Exceptions\EmailExistsException;
 use App\Exceptions\FeatureNotYetImplementedException;
 use App\Exceptions\Group\GroupNotFoundException;
-use App\Exceptions\User\NotEmailException;
-use App\Exceptions\PasswordToWeakException;
-use App\Exceptions\User\UserNotFoundException;
-use App\Exceptions\User\WrongLoginOrPasswordException;
+use App\Exceptions\User\{
+    NotEmailException,
+    EmailExistsException,
+    NotPhoneException,
+    PasswordToWeakException,
+    PhoneExistsException,
+    UserNotFoundException,
+    WrongLoginOrPasswordException,
+};
 use App\Models\Group;
 use App\Models\User;
 use Exception;
 use Illuminate\Hashing\HashManager;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use libphonenumber\PhoneNumberUtil;
 
 /**
  * UserRepository class
@@ -28,28 +32,45 @@ class UserRepository implements UserRepositoryContract
      * @param string $name
      * @param string $email
      * @param string $plainPassword
+     * @param string phone
      *
      * @return User
      *
      * @throws EmailExistsException
      * @throws NotEmailException
+     * @throws NotPhoneException
+     * @throws PhoneExistsException
+     * @throws PasswordToWeakException
      */
     public function create(
         string $name,
         string $email,
         string $plainPassword,
+        string $phone,
     ): User {
         if (!$this->validateEmail($email)) {
             throw new NotEmailException();
         }
-        if ($this->emailExists($email)) {
-            throw new EmailExistsException();
+        if (!$this->validatePhone($phone)) {
+            throw new NotPhoneException();
         }
         if (!$this->validatePassword($plainPassword)) {
             throw new PasswordToWeakException();
         }
+        if ($this->emailExists($email)) {
+            throw new EmailExistsException();
+        }
+        if ($this->phoneExists($phone)) {
+            throw new PhoneExistsException();
+        }
+
         /** @var User */
-        $user = User::create(['name' => $name, 'email' => $email, 'password' => $plainPassword]);
+        $user = User::create([
+            'name' => $name,
+            'email' => $email,
+            'password' => $plainPassword,
+            'phone' => $phone,
+        ]);
         return $user;
     }
 
@@ -63,6 +84,11 @@ class UserRepository implements UserRepositoryContract
         return User::whereEmail($email)->count() > 0;
     }
 
+    public function phoneExists(string $phone): bool
+    {
+        return User::where('phone', $phone)->count() > 0;
+    }
+
     public function getPasswordStrength(): int
     {
         return 5;
@@ -74,6 +100,17 @@ class UserRepository implements UserRepositoryContract
             return false;
         }
 
+        return true;
+    }
+
+    public function validatePhone(string $phone): bool
+    {
+        $phoneUtil = PhoneNumberUtil::getInstance();
+        try {
+            $phoneUtil->parse($phone);
+        } catch (Exception) {
+            return false;
+        }
         return true;
     }
 
@@ -154,7 +191,7 @@ class UserRepository implements UserRepositoryContract
     public function update(User|int $user, Collection|array $fields): User
     {
         throw new FeatureNotYetImplementedException('You cant edit users right now');
-        
+
         return $user;
     }
 
