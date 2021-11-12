@@ -3,9 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -17,10 +15,13 @@ use Laravel\Lumen\Auth\Authorizable;
  * @property int $id
  * @property string $email
  * @property string $name
+ * @property string $phone
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Group $group
  * @property Collection $tokens
+ * @property string $country
+ * @property string $city
  * @method string getHashPassword()
  */
 class User extends Model implements AuthorizableContract
@@ -35,7 +36,7 @@ class User extends Model implements AuthorizableContract
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password'
+        'name', 'email', 'password', 'phone',
     ];
 
     /**

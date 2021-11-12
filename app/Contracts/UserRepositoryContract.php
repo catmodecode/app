@@ -27,11 +27,13 @@ interface UserRepositoryContract
      * @param string $name
      * @param string $email
      * @param string $plainPassword
+     * @param string $phone
      */
     public function create(
         string $name,
         string $email,
         string $plainPassword,
+        string $phone,
     ): User;
 
     /**
@@ -49,6 +51,22 @@ interface UserRepositoryContract
      * @return boolean
      */
     public function emailExists(string $email): bool;
+
+    /**
+     * Валидация телефона
+     *
+     * @param string $phone
+     * @return boolean
+     */
+    public function validatePhone(string $phone): bool;
+
+    /**
+     * Проверка на дубликат телефона
+     *
+     * @param string $phone
+     * @return boolean
+     */
+    public function phoneExists(string $phone): bool;
 
     /**
      * Валидация длины пароля, спец символов и т.д.

@@ -67,7 +67,7 @@ class JwtTest extends \Codeception\Test\Unit
         $jwtService->method('getAccessExpired')
             ->willReturn(Carbon::now('UTC'));
         $userRepository = $this->userRepository;
-        $testUser = $userRepository->create('testUser', 'test@mail.ru', '123qweR%');
+        $testUser = $userRepository->create('testUser', 'test@mail.ru', '123qweR%', '+79132149890');
         $userJwt = $jwtService->generateAccessJwt($testUser);
         $jwtService->decode($userJwt);
     }
@@ -75,7 +75,7 @@ class JwtTest extends \Codeception\Test\Unit
     public function testGenerateUserJwtWrongSignature()
     {
         $this->expectException(SignatureInvalidException::class);
-        $userRepository = new $this->userRepository;
+        $userRepository = $this->userRepository;
         /** @var JwtService|MockObject */
         $jwtService = $this->getMockBuilder(JwtService::class)
             ->onlyMethods(['getPublicKey'])
@@ -92,7 +92,7 @@ class JwtTest extends \Codeception\Test\Unit
             return $publicKeyPem;
         });
 
-        $testUser = $userRepository->create('testUser', 'test1@mail.ru', '123qweR%');
+        $testUser = $userRepository->create('testUser', 'test1@mail.ru', '123qweR%', '+79999999999');
         $userJwt = $jwtService->generateAccessJwt($testUser, collect([]));
         $jwtService->decode($userJwt);
     }
@@ -100,7 +100,7 @@ class JwtTest extends \Codeception\Test\Unit
     public function testStoreRefreshTokens()
     {
         $user = $this->userRepository
-            ->create('storeRefreshToken', 'storeRefreshToken@mail.ru', '123qwe!@');
+            ->create('storeRefreshToken', 'storeRefreshToken@mail.ru', '123qwe!@', '+79999999997');
         $token = $this->jwtService->generateAndStoreRefreshJwt($user);
         $stored = Token::where('token', $token->token)->first();
         $this->assertNotNull($stored, 'Сгенерированный и сохраненный токен не найден в базе');
@@ -117,11 +117,16 @@ class JwtTest extends \Codeception\Test\Unit
             ->getMock();
         $jwtService->method('getRefreshExpired')
             ->willReturn(Carbon::now('UTC'));
-        
+
         $userRepository = $this->userRepository;
-        $user = $userRepository->create('testExpireRefreshToken', 'testExpireRefreshToken@mail.ru', '123qwe!@123qwe!@');
+        $user = $userRepository->create(
+            'testExpireRefreshToken',
+            'testExpireRefreshToken@mail.ru',
+            '123qwe!@123qwe!@',
+            '+79999999998'
+        );
         $generatedToken = $jwtService->generateAndStoreRefreshJwt($user);
-        
+
         $this->expectException(ExpiredException::class);
         $jwtService->useToken($generatedToken->token);
     }

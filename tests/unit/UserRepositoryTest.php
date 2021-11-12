@@ -1,9 +1,12 @@
 <?php
+
 namespace Tests;
 
 use App\Contracts\GroupRepositoryContract;
 use App\Contracts\UserRepositoryContract;
 use App\Exceptions\FeatureNotYetImplementedException;
+use App\Exceptions\User\NotPhoneException;
+use App\Exceptions\User\PhoneExistsException;
 use App\Exceptions\User\UserNotFoundException;
 use App\Exceptions\User\WrongLoginOrPasswordException;
 use App\Models\User;
@@ -18,7 +21,7 @@ class UserRepositoryTest extends \Codeception\Test\Unit
     protected $tester;
 
     protected UserRepositoryContract $userRepository;
-    
+
     protected function _before()
     {
         $this->userRepository = app()->make(UserRepositoryContract::class);
@@ -38,8 +41,9 @@ class UserRepositoryTest extends \Codeception\Test\Unit
         $name = 'userName';
         $email = 'testCreateNewUser@mail.ru';
         $password = 'pass12345';
-        
-        $user = $userRepository->create($name, $email, $password);
+        $phone = '+79999999996';
+
+        $user = $userRepository->create($name, $email, $password, $phone);
         $this->assertInstanceOf(
             User::class,
             $user,
@@ -56,8 +60,9 @@ class UserRepositoryTest extends \Codeception\Test\Unit
         $name = 'userName';
         $email = 'testCheckCredintials@mail.ru';
         $password = 'pass12345';
-        
-        $user = $userRepository->create($name, $email, $password);
+        $phone = '+7999999996';
+
+        $user = $userRepository->create($name, $email, $password, $phone);
 
         /** @var \Illuminate\Hashing\HashManager */
         $hash = app('hash');
@@ -74,8 +79,9 @@ class UserRepositoryTest extends \Codeception\Test\Unit
         $name = 'userName';
         $email = 'testFindUserById@mail.ru';
         $password = 'pass12345';
+        $phone = '+79999999995';
 
-        $user = $userRepository->create($name, $email, $password);
+        $user = $userRepository->create($name, $email, $password, $phone);
 
         $recievedUser = $userRepository->getById($user->id);
         $this->assertEquals($email, $recievedUser->email, 'Поиск выдал не того пользователя');
@@ -91,10 +97,13 @@ class UserRepositoryTest extends \Codeception\Test\Unit
         $name3 = 'plain name 1';
         $email3 = 'special@not.only.ru';
         $password = 'pass12345';
+        $phone1 = '+79999999991';
+        $phone2 = '+79999999992';
+        $phone3 = '+79999999993';
 
-        $userRepository->create($name1, $email1, $password);
-        $userRepository->create($name2, $email2, $password);
-        $userRepository->create($name3, $email3, $password);
+        $userRepository->create($name1, $email1, $password, $phone1);
+        $userRepository->create($name2, $email2, $password, $phone2);
+        $userRepository->create($name3, $email3, $password, $phone3);
 
         $searchList1 = $userRepository->search('special');
         $this->assertCount(3, $searchList1, sprintf('Ожидалось 3 пользователя, пришло %d', $searchList1->count()));
@@ -120,9 +129,11 @@ class UserRepositoryTest extends \Codeception\Test\Unit
         $email = 'testCheckUserSoftDelete@mail.ru';
         $email2 = 'testCheckUserSoftDelete2@mail.ru';
         $password = 'pass12345';
+        $phone1 = '+79999999980';
+        $phone2 = '+79999999981';
 
-        $user = $userRepository->create($name, $email, $password);
-        $user2 = $userRepository->create($name, $email2, $password);
+        $user = $userRepository->create($name, $email, $password, $phone1);
+        $user2 = $userRepository->create($name, $email2, $password, $phone2);
 
         $userId = $user->id;
 
@@ -159,7 +170,7 @@ class UserRepositoryTest extends \Codeception\Test\Unit
         $userRepository = $this->userRepository;
         /** @var GroupRepositoryContract */
         $groupRepository = app()->make(GroupRepositoryContract::class);
-        $user = $userRepository->create('UserToGroup', 'usertogroup@mail.ru', '12321qwe!@');
+        $user = $userRepository->create('UserToGroup', 'usertogroup@mail.ru', '12321qwe!@', '+79999999982');
         $group = $groupRepository->create('groupToAdd');
         $group2 = $groupRepository->create('groupToAdd2');
         $userRepository->addToGroup($user, $group);
@@ -167,7 +178,32 @@ class UserRepositoryTest extends \Codeception\Test\Unit
 
         $resultUser = $userRepository->getById($user->id);
         $relatedGroups = $resultUser->groups;
-        $this->assertCount(1, $relatedGroups->filter(fn($v) => $v->id === $group->id));
+        $this->assertCount(1, $relatedGroups->filter(fn ($v) => $v->id === $group->id));
         $this->assertCount(1, $relatedGroups->filter(fn ($v) => $v->id === $group2->id));
+    }
+
+    public function testPhoneValid()
+    {
+        $userRepository = $this->userRepository;
+        $userRepository->create(
+            'testPhoneValid',
+            'testPhoneValid@mail.com',
+            'testPhoneValidpass',
+            '+79999999986'
+        );
+        $this->expectException(PhoneExistsException::class);
+        $userRepository->create(
+            'testPhoneValid2',
+            'testPhoneValid2@mail.com',
+            'testPhoneValidpass',
+            '+79999999986'
+        );
+        $this->expectException(NotPhoneException::class);
+        $userRepository->create(
+            'testPhoneValid',
+            'testPhoneValid@mail.com',
+            'testPhoneValidpass',
+            '89999999985'
+        );
     }
 }
