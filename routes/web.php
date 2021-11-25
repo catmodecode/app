@@ -32,4 +32,5 @@ $router->group(['prefix' => 'auth', 'as' => 'auth'], function () use ($router) {
 
 $router->group(['prefix' => 'users', 'as' => 'users'], function () use ($router) {
     $router->get('self', ['uses' => UserController::class . '@getSelf', 'as' => 'getSelf']);
+    $router->put('self', ['uses' => UserController::class . '@updateSelf', 'as' => 'updateSelf']);
 });
