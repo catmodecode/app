@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 use Laravel\Lumen\Auth\Authorizable;
 
 /**
@@ -15,14 +15,20 @@ use Laravel\Lumen\Auth\Authorizable;
  * @property int $id
  * @property string $email
  * @property string $name
+ * @property string $phone
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property Group $group
+ * @property Collection $tokens
+ * @property string $country
+ * @property string $city
  * @method string getHashPassword()
  */
 class User extends Model implements AuthorizableContract
 {
     use Authorizable;
     use HasFactory;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -30,7 +36,7 @@ class User extends Model implements AuthorizableContract
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password'
+        'name', 'email', 'password', 'phone',
     ];
 
     /**
@@ -42,12 +48,22 @@ class User extends Model implements AuthorizableContract
         'password',
     ];
 
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class, 'user_group');
+    }
+
+    public function tokens()
+    {
+        return $this->hasMany(Token::class, 'tokens');
+    }
+
     public function setPasswordAttribute($plainPassword)
     {
         $this->attributes['password'] = User::getHashPassword($plainPassword);
     }
 
-    public static function getHashPassword(string $plainPassword): string
+    protected static function getHashPassword(string $plainPassword): string
     {
         return app('hash')->make($plainPassword);
     }

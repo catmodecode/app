@@ -6,6 +6,7 @@ use App\Console\Commands\CreateUserCommand;
 use App\Console\Commands\GenerateExceptionCommand;
 use App\Console\Commands\GenerateTokensCommand;
 use App\Console\Commands\KeyGenerateCommand;
+use App\Console\Commands\RoutesCommand;
 use App\Console\Commands\Test;
 use Illuminate\Console\Scheduling\Schedule;
 use Laravel\Lumen\Console\Kernel as ConsoleKernel;
@@ -22,6 +23,7 @@ class Kernel extends ConsoleKernel
         GenerateTokensCommand::class,
         KeyGenerateCommand::class,
         GenerateExceptionCommand::class,
+        RoutesCommand::class,
     ];
 
     /**
