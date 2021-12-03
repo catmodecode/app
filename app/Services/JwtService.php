@@ -65,7 +65,7 @@ class JwtService
      */
     public function getUserFromToken(string $jwt): User
     {
-        $userId = $this->decode($jwt)?->id;
+        $userId = $this->decode($jwt)?->user_id;
         $userRepository = app()->make(UserRepositoryContract::class);
         return $userRepository->getById($userId);
     }

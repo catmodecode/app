@@ -7,6 +7,7 @@ use App\Http\Controllers\NamedRoutesController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SpaController;
 use App\Http\Controllers\User\UserController;
+use App\Http\Middleware\Authenticate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Route;
 use Laravel\Lumen\Http\Request;
@@ -30,7 +31,9 @@ $router->group(['prefix' => 'auth', 'as' => 'auth'], function () use ($router) {
     $router->post('refresh', ['uses' => AuthController::class . '@refresh', 'as' => 'refresh']);
 });
 
-$router->group(['prefix' => 'users', 'as' => 'users'], function () use ($router) {
-    $router->get('self', ['uses' => UserController::class . '@getSelf', 'as' => 'getSelf']);
-    $router->put('self', ['uses' => UserController::class . '@updateSelf', 'as' => 'updateSelf']);
+$router->group(['middleware' => 'auth'], function () use ($router) {
+    $router->group(['prefix' => 'users', 'as' => 'users'], function () use ($router) {
+        $router->get('self', ['uses' => UserController::class . '@getSelf', 'as' => 'getSelf']);
+        $router->put('self', ['uses' => UserController::class . '@updateSelf', 'as' => 'updateSelf']);
+    });
 });

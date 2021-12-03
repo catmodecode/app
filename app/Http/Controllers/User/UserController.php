@@ -9,14 +9,15 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function getSelf(UserRepositoryContract $userRepository)
+    public function getSelf(UserRepositoryContract $userRepository, Request $request)
     {
-        return new UserSelfResource($userRepository->getById(6));
+        $user = $request->user();
+        return new UserSelfResource($user);
     }
 
     public function updateSelf(UserRepositoryContract $userRepository, Request $request)
     {
-        $user = $userRepository->getById(6);
+        $user = $request->user();
         $user->name = $request->input('name');
         $user->save();
         return new UserSelfResource($user);
