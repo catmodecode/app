@@ -11,19 +11,20 @@ use App\Services\JwtService;
 use Exception;
 use Firebase\JWT\ExpiredException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    public function __construct(protected JwtService $jwtService)
-    {
+    public function __construct(
+        private JwtService $jwtService
+    ) {
     }
 
-    public function login(UserRepository $userRepository)
+    public function login(Request $request, UserRepository $userRepository)
     {
-        $validator = Validator::make(Request::all(), [
+        $validator = Validator::make($request->all(), [
             'email' => ['required', 'email', 'exists:users,email'],
             'password' => ['required'],
         ], [
@@ -40,8 +41,8 @@ class AuthController extends Controller
             return $failResponse;
         }
 
-        $email = Request::get('email');
-        $password = Request::get('password');
+        $email = $request->input('email');
+        $password = $request->input('password');
 
         try {
             $user = $userRepository->checkCredintials($email, $password);
@@ -58,9 +59,9 @@ class AuthController extends Controller
         return new JsonResponse($tokenResult, 201);
     }
 
-    public function refresh()
+    public function refresh(Request $request)
     {
-        $validator = Validator::make(Request::all(), [
+        $validator = Validator::make($request->all(), [
             'token' => ['required', 'exists:tokens,token'],
         ], [
             'required' => ':attribute_required',
@@ -75,10 +76,10 @@ class AuthController extends Controller
             return $failResponse;
         }
 
-        $token = Request::get('token');
+        $token = $request->input('token');
 
         $jwtService = $this->jwtService;
-        
+
         try {
             $token = $jwtService->useToken($token);
         } catch (ExpiredException) {
@@ -103,8 +104,17 @@ class AuthController extends Controller
     /**
      * @param User $user
      * @return Collection
-     * 
-     * @throws Exception
+     *
+     * @throws InvalidArgumentException — — Provided JWT was empty
+     * @throws UnexpectedValueException — — Provided JWT was invalid
+     * @throws SignatureInvalidException
+     * Provided JWT was invalid because the signature verification failed
+     * @throws BeforeValidException
+     * Provided JWT is trying to be used before it's eligible as defined by 'nbf'
+     * @throws BeforeValidException
+     * Provided JWT is trying to be used before it's been created as defined by 'iat'
+     * @throws ExpiredException
+     * Provided JWT has since expired, as defined by the 'exp' claim
      */
     protected function generateTokens(User $user): Collection
     {

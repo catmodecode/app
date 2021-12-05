@@ -117,7 +117,7 @@ interface UserRepositoryContract
     public function search(string $search, int $limit = 0, int $offset = 0): Collection;
 
     /**
-     * Изменение пользователя по переданным полям
+     * Изменение пользователя по переданным fillable полям
      * 
      * @param User|int $user
      * @param Collection|array $fields

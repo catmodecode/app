@@ -190,7 +190,12 @@ class UserRepository implements UserRepositoryContract
 
     public function update(User|int $user, Collection|array $fields): User
     {
-        throw new FeatureNotYetImplementedException('You cant edit users right now');
+        if (is_int($user)) {
+            $user = $this->getById($user);
+        }
+
+        $user->fill($fields);
+        $user->save();
 
         return $user;
     }

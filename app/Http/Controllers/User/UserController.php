@@ -18,8 +18,7 @@ class UserController extends Controller
     public function updateSelf(UserRepositoryContract $userRepository, Request $request)
     {
         $user = $request->user();
-        $user->name = $request->input('name');
-        $user->save();
+        $user = $userRepository->update($user, ['name' => $request->input('name')]);
         return new UserSelfResource($user);
     }
 }

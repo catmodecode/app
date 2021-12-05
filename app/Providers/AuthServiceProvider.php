@@ -35,13 +35,18 @@ class AuthServiceProvider extends ServiceProvider
         // should return either a User instance or null. You're free to obtain
         // the User instance via an API token or any other method necessary.
 
-        $this->app['auth']->viaRequest('api', function (Request $request): User {
+        $this->app['auth']->viaRequest('api', function (Request $request): ?User {
             $token = $request->headers->get('authorization');
-            if (isset($token)) {
-                /** @var JwtService $jwtService */
-                $jwtService = app()->make(JwtService::class);
-                return $jwtService->getUserFromToken($token);
+            if (!isset($token)) {
+                return null;
             }
+            /** @var JwtService $jwtService */
+            $jwtService = app()->make(JwtService::class);
+            return $jwtService->getUserFromToken($token);
+        });
+
+        Gate::define('edit-users', function (User $user, User $editUser) {
+            return ($user->id === $editUser->id) || ($user->isAdmin());
         });
     }
 }
