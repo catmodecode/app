@@ -113,13 +113,19 @@ class UserRepositoryTest extends \Codeception\Test\Unit
         $this->assertCount(2, $searchList3, sprintf('Ожидалось 2 пользователя, пришло %d', $searchList3->count()));
     }
 
-    public function testUserEditIsRestrictedForNow()
+    public function testUserEdit()
     {
-        $this->expectException(FeatureNotYetImplementedException::class);
+        $firstPhone = '+79132140000';
+        $editUser = $this->userRepository->create(
+            'userEdit',
+            'userEdit@mail.com',
+            'pass321654',
+            $firstPhone
+        );
 
-        $user = new User();
-
-        $this->userRepository->update($user, []);
+        $phone = '+79132140001';
+        $this->userRepository->update($editUser, ['phone' => $phone]);
+        $this->assertEquals($phone, $editUser->phone);
     }
 
     public function testCheckUserSoftDelete()

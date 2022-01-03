@@ -18,6 +18,8 @@ class CreateTokensTable extends Migration
             $table->timestamp('delete_at');
             $table->unsignedBigInteger('user_id');
 
+            $table->foreign('user_id')->on('users')->references('id')->onDelete('set null');
+
             $table->unique('token');
         });
     }

@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Middleware\MeasureExecutionTime;
+use App\Providers\AppServiceProvider;
+use App\Providers\AuthServiceProvider;
+use App\Providers\EventServiceProvider;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -129,9 +132,9 @@ $app->routeMiddleware([
 |
 */
 
-$app->register(App\Providers\AppServiceProvider::class);
-$app->register(App\Providers\AuthServiceProvider::class);
-$app->register(App\Providers\EventServiceProvider::class);
+$app->register(AppServiceProvider::class);
+$app->register(AuthServiceProvider::class);
+$app->register(EventServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------

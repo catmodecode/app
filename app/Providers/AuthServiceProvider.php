@@ -30,23 +30,23 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // Here you may define how you wish users to be authenticated for your Lumen
-        // application. The callback which receives the incoming request instance
-        // should return either a User instance or null. You're free to obtain
-        // the User instance via an API token or any other method necessary.
+        /** !WARN Не забывать при добавлении нового гейта добавлять миграцию в таблицу rights 
+         * В гейтах проверяем только связь пользователя с записью в rights через RightsRepository
+         */
 
         $this->app['auth']->viaRequest('api', function (Request $request): ?User {
             $token = $request->headers->get('authorization');
-            if (!isset($token)) {
+            if (!isset($token) || !str_contains($token, 'Bearer')) {
                 return null;
             }
+            $token = substr($token, 7);
             /** @var JwtService $jwtService */
             $jwtService = app()->make(JwtService::class);
             return $jwtService->getUserFromToken($token);
         });
 
         Gate::define('edit-users', function (User $user, User $editUser) {
-            return ($user->id === $editUser->id) || ($user->isAdmin());
+            return $user->isAdmin();
         });
     }
 }

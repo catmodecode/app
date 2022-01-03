@@ -4,12 +4,12 @@ namespace App\Http\Controllers\User;
 
 use App\Contracts\UserRepositoryContract;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\UserSelfResource;
+use App\Http\Resources\User\UserSelfResource;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function getSelf(UserRepositoryContract $userRepository, Request $request)
+    public function getSelf(Request $request)
     {
         $user = $request->user();
         return new UserSelfResource($user);

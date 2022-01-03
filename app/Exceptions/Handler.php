@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -50,13 +51,19 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
+        Log::critical(sprintf(
+            "Message: %s\nCode: %d\nFile: %s\nLine: %d\nTrace: %s\n\n",
+            $exception->getMessage(),
+            $exception->getCode(),
+            $exception->getFile(),
+            $exception->getLine(),
+            $exception->getTraceAsString(),
+        ));
+
         if (env('APP_ENV', 'production') === 'local') {
             return parent::render($request, $exception);
         }
 
-        
-
-        $status = $exception->getCode();
-        return new JsonResponse(['errors' => ['internal_server_error']], $status);
+        return new JsonResponse(['errors' => ['internal_server_error']], 500);
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Contracts\UserRepositoryContract;
-use App\Exceptions\FeatureNotYetImplementedException;
 use App\Exceptions\Group\GroupNotFoundException;
 use App\Exceptions\User\{
     NotEmailException,
@@ -120,7 +119,7 @@ class UserRepository implements UserRepositoryContract
      * @param string $userEmail
      * @param string $password
      * @return User
-     * 
+     *
      * @throws WrongLoginOrPasswordException
      */
     public function checkCredintials(string $userEmail, string $password): User
@@ -190,9 +189,7 @@ class UserRepository implements UserRepositoryContract
 
     public function update(User|int $user, Collection|array $fields): User
     {
-        if (is_int($user)) {
-            $user = $this->getById($user);
-        }
+        $user = is_int($user) ? $this->getById($user) : $user;
 
         $user->fill($fields);
         $user->save();
